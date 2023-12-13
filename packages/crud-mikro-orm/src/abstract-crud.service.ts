@@ -149,7 +149,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
         this.entityColumnsHash[prop.targetMeta.name] = `${prop.name}.${prop.targetMeta.collection}`;
         return prop.targetMeta.collection;
       }
-      this.entityColumnsHash[prop.name] = prop.name;
+      this.entityColumnsHash[prop.name] = prop.fieldNames[0] ?? prop.name;
 
       return prop.name;
     });
