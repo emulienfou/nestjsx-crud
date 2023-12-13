@@ -1,10 +1,12 @@
 import { Constructor, EntityMetadata, GroupOperator, type QBFilterQuery } from '@mikro-orm/core';
 import { QueryBuilder } from '@mikro-orm/knex';
+import { EntityManager as MariaDbEntityManager, EntityRepository as MariaDbEntityRepository } from '@mikro-orm/mariadb';
 import { EntityManager as MySQLEntityManager, EntityRepository as MySQLEntityRepository } from '@mikro-orm/mysql';
 import {
   EntityManager as PostgreSQLEntityManager,
   EntityRepository as PostgreSQLEntityRepository,
 } from '@mikro-orm/postgresql';
+import { EntityManager as SqliteEntityManager, EntityRepository as SqliteEntityRepository } from '@mikro-orm/sqlite';
 import { NotImplementedException } from '@nestjs/common';
 import {
   CrudRequest,
@@ -16,7 +18,8 @@ import {
   QueryOptions,
 } from '@nestjsx/crud';
 import {
-  ComparisonOperator, CondOperator,
+  ComparisonOperator,
+  CondOperator,
   ParsedRequestParams,
   QueryFilter,
   QueryJoin,
@@ -65,11 +68,11 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     /((%27)|('))union/gi,
   ];
 
-  protected readonly em: MySQLEntityManager | PostgreSQLEntityManager;
+  protected readonly em: MariaDbEntityManager | MySQLEntityManager | PostgreSQLEntityManager | SqliteEntityManager;
 
   protected readonly metadata: EntityMetadata<T>;
 
-  constructor(protected repo: MySQLEntityRepository<T> | PostgreSQLEntityRepository<T>) {
+  constructor(protected repo: MariaDbEntityRepository<T> | MySQLEntityRepository<T> | PostgreSQLEntityRepository<T> | SqliteEntityRepository<T>) {
     super();
 
     this.em = repo.getEntityManager();
