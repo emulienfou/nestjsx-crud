@@ -5,7 +5,9 @@ import {
   EntityManager as PostgreSQLEntityManager,
   EntityRepository as PostgreSQLEntityRepository,
 } from '@mikro-orm/postgresql';
+import { NotImplementedException } from '@nestjs/common/exceptions/not-implemented.exception';
 import {
+  CrudRequest,
   CrudRequestOptions,
   CrudService,
   GetManyDefaultResponse,
@@ -14,7 +16,7 @@ import {
   QueryOptions,
 } from '@nestjsx/crud';
 import {
-  ComparisonOperator,
+  ComparisonOperator, CondOperator,
   ParsedRequestParams,
   QueryFilter,
   QueryJoin,
@@ -22,7 +24,7 @@ import {
   SCondition,
   SConditionKey,
 } from '@nestjsx/crud-request';
-import { isArrayFull, isNil, isNull, isObject, ObjectLiteral, objKeys } from '@nestjsx/util';
+import { hasLength, isArrayFull, isNil, isNull, isObject, ObjectLiteral, objKeys } from '@nestjsx/util';
 
 interface IAllowedRelation {
   alias?: string;
@@ -230,41 +232,44 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     }
 
     switch (operator) {
-      case '$eq':
+      case CondOperator.EQUALS:
         return { [fieldAlias]: { $eq: value } };
 
-      case '$ne':
+      case CondOperator.NOT_EQUALS:
         return { [fieldAlias]: { $ne: value } };
 
-      case '$gt':
+      case CondOperator.GREATER_THAN:
         return { [fieldAlias]: { $gt: value } };
 
-      case '$lt':
+      case CondOperator.LOWER_THAN:
         return { [fieldAlias]: { $lt: value } };
 
-      case '$gte':
+      case CondOperator.GREATER_THAN_EQUALS:
         return { [fieldAlias]: { $gte: value } };
 
-      case '$lte':
+      case CondOperator.LOWER_THAN_EQUALS:
         return { [fieldAlias]: { $lte: value } };
 
-      case '$in':
+      case CondOperator.IN:
         this.checkFilterIsArray({ field, value, operator });
         return { [fieldAlias]: { $in: value } };
 
-      case '$notin':
+      case CondOperator.NOT_IN:
         this.checkFilterIsArray({ field, value, operator });
         return { [fieldAlias]: { $nin: value } };
 
-      case '$isnull':
+      case CondOperator.IS_NULL:
         return { [fieldAlias]: { $eq: null } };
 
-      case '$notnull':
+      case CondOperator.NOT_NULL:
         return { [fieldAlias]: { $exists: true } };
+
+      case CondOperator.CONTAINS:
+        return { [fieldAlias]: { $contains: value } };
 
       /* istanbul ignore next */
       default:
-        return { [fieldAlias]: { $eq: value } };
+        throw new NotImplementedException('Not supported operator by Mikro-ORM');
     }
   }
 
@@ -605,6 +610,26 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
         }
       }
     }
+  }
+
+  protected prepareEntityBeforeSave(dto: T | Partial<T>, parsed: CrudRequest['parsed']): T {
+    /* istanbul ignore if */
+    if (!isObject(dto)) {
+      return undefined;
+    }
+
+    if (hasLength(parsed.paramsFilter)) {
+      for (const filter of parsed.paramsFilter) {
+        dto[filter.field] = filter.value;
+      }
+    }
+
+    /* istanbul ignore if */
+    if (!hasLength(objKeys(dto))) {
+      return undefined;
+    }
+
+    return this.em.create(this.entityName, dto as any);
   }
 
   private checkFilterIsArray(cond: QueryFilter, withLength?: boolean): void {

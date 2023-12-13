@@ -92,20 +92,16 @@ export class MikroOrmCrudService<T extends object> extends AbstractCrudService<T
       this.throwBadRequestException('Empty data. Nothing to save.');
     }
 
-    const bulk = dto.bulk.filter((d) => !isUndefined(d));
+    const bulk = dto.bulk.map((one) => this.prepareEntityBeforeSave(one, req.parsed)).filter((d) => !isUndefined(d));
 
     /* istanbul ignore if */
     if (!hasLength(bulk)) {
       this.throwBadRequestException('Empty data. Nothing to save.');
     }
 
-    bulk.map((entity) => {
-      this.em.persist(entity);
-    });
+    await this.em.persistAndFlush(bulk);
 
-    await this.em.flush();
-
-    return;
+    return bulk;
   }
 
   /**
