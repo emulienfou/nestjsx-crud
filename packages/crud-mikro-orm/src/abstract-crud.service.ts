@@ -42,7 +42,7 @@ enum DriverName {
   POSTGRESQL = 'PostgreSqlDriver',
   MYSQL = 'MySqlDriver',
   MARIADB = 'MariaDbDriver',
-  SQLITE = 'SqliteDriver'
+  SQLITE = 'SqliteDriver',
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -72,7 +72,13 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
   protected readonly metadata: EntityMetadata<T>;
 
-  constructor(protected repo: MariaDbEntityRepository<T> | MySQLEntityRepository<T> | PostgreSQLEntityRepository<T> | SqliteEntityRepository<T>) {
+  constructor(
+    protected repo:
+      | MariaDbEntityRepository<T>
+      | MySQLEntityRepository<T>
+      | PostgreSQLEntityRepository<T>
+      | SqliteEntityRepository<T>,
+  ) {
     super();
 
     this.em = repo.getEntityManager();
@@ -140,7 +146,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     this.entityColumns = this.metadata.props.map((prop) => {
       // In case column is an embedded, use the propertyPath to get complete path
       if (prop.targetMeta) {
-        this.entityColumnsHash[prop.targetMeta.name] = `${ prop.name }.${ prop.targetMeta.collection }`;
+        this.entityColumnsHash[prop.targetMeta.name] = `${prop.name}.${prop.targetMeta.collection}`;
         return prop.targetMeta.collection;
       }
       this.entityColumnsHash[prop.name] = prop.name;
@@ -171,7 +177,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
         ...(options.persist && options.persist.length ? options.persist : []),
         ...columns,
         ...this.entityPrimaryColumns,
-      ].map((col) => `${ this.alias }.${ col }`),
+      ].map((col) => `${this.alias}.${col}`),
     );
 
     return Array.from(select);
@@ -185,17 +191,17 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
    */
   protected getAllowedColumns(columns: string[], options: QueryOptions): string[] {
     return (!options.exclude || !options.exclude.length) &&
-    (!options.allow || /* istanbul ignore next */ !options.allow.length)
+      (!options.allow || /* istanbul ignore next */ !options.allow.length)
       ? columns
       : columns.filter(
-        (column) =>
-          (options.exclude && options.exclude.length
-            ? !options.exclude.some((col) => col === column)
-            : /* istanbul ignore next */ true) &&
-          (options.allow && options.allow.length
-            ? options.allow.some((col) => col === column)
-            : /* istanbul ignore next */ true),
-      );
+          (column) =>
+            (options.exclude && options.exclude.length
+              ? !options.exclude.some((col) => col === column)
+              : /* istanbul ignore next */ true) &&
+            (options.allow && options.allow.length
+              ? options.allow.some((col) => col === column)
+              : /* istanbul ignore next */ true),
+        );
   }
 
   /**
@@ -208,8 +214,8 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     return query.sort && query.sort.length
       ? this.mapSort(query.sort)
       : options.sort && options.sort.length
-        ? this.mapSort(options.sort)
-        : {};
+      ? this.mapSort(options.sort)
+      : {};
   }
 
   protected mapSort(sort: QuerySort[]): ObjectLiteral {
@@ -283,12 +289,12 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     switch (cols.length) {
       case 1:
         if (sort) {
-          return `${ this.alias }.${ field }`;
+          return `${this.alias}.${field}`;
         }
 
         const dbColName = this.entityColumnsHash[field] !== field ? this.entityColumnsHash[field] : field;
 
-        return `${ i }${ this.alias }${ i }.${ i }${ dbColName }${ i }`;
+        return `${i}${this.alias}${i}.${i}${dbColName}${i}`;
       case 2:
         return field;
       default:
@@ -296,7 +302,11 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     }
   }
 
-  protected setSearchCondition(builder: QueryBuilder<T>, search: SCondition, operator: GroupOperator = GroupOperator.$and): void {
+  protected setSearchCondition(
+    builder: QueryBuilder<T>,
+    search: SCondition,
+    operator: GroupOperator = GroupOperator.$and,
+  ): void {
     /* istanbul ignore else */
     if (isObject(search)) {
       const keys = objKeys(search);
@@ -398,8 +408,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
   protected getEntityColumns(entityMetadata: EntityMetadata): { columns: string[]; primaryColumns: string[] } {
     const columns = entityMetadata.props.map(({ name }) => name) || /* istanbul ignore next */ [];
-    const primaryColumns =
-      entityMetadata.getPrimaryProps().map(({ name }) => name) || /* istanbul ignore next */ [];
+    const primaryColumns = entityMetadata.getPrimaryProps().map(({ name }) => name) || /* istanbul ignore next */ [];
 
     return { columns, primaryColumns };
   }
@@ -423,7 +432,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
           if (found) {
             name = fields[0];
-            path = `${ this.alias }.${ fields[0] }`;
+            path = `${this.alias}.${fields[0]}`;
             relationMetadata = found.targetMeta;
           }
         } else {
@@ -432,15 +441,13 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
           const reduced = fields.reduce(
             (res, propertyName: string, i) => {
-              const found = res.relations.length
-                ? res.relations.find(({ name }) => name === propertyName)
-                : null;
+              const found = res.relations.length ? res.relations.find(({ name }) => name === propertyName) : null;
               const relationMetadata = found ? found.targetMeta : null;
               const relations = relationMetadata ? relationMetadata.relations : [];
               name = propertyName;
 
               if (i !== fields.length - 1) {
-                parentPath = !parentPath ? propertyName : /* istanbul ignore next */ `${ parentPath }.${ propertyName }`;
+                parentPath = !parentPath ? propertyName : /* istanbul ignore next */ `${parentPath}.${propertyName}`;
               }
 
               return {
@@ -465,7 +472,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
             /* istanbul ignore next */
             if (parentAllowedRelation) {
-              path = parentAllowedRelation.alias ? `${ parentAllowedRelation.alias }.${ name }` : field;
+              path = parentAllowedRelation.alias ? `${parentAllowedRelation.alias}.${name}` : field;
             }
           }
 
@@ -523,7 +530,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
       const select = new Set(
         [...allowedRelation.primaryColumns, ...(isArrayFull(options.persist) ? options.persist : []), ...columns].map(
-          (col) => `${ alias }.${ col }`,
+          (col) => `${alias}.${col}`,
         ),
       );
 
@@ -575,7 +582,12 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
         if (isObject(object.$or)) {
           const orKeys = objKeys(object.$or);
-          this.setSearchFieldObjectCondition(builder, orKeys.length === 1 ? condition : GroupOperator.$or, field, object.$or);
+          this.setSearchFieldObjectCondition(
+            builder,
+            orKeys.length === 1 ? condition : GroupOperator.$or,
+            field,
+            object.$or,
+          );
         } else {
           this.builderSetWhere(builder, condition, field, value, operator);
         }
@@ -637,7 +649,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
   private checkFilterIsArray(cond: QueryFilter, withLength?: boolean): void {
     /* istanbul ignore if */
     if (!Array.isArray(cond.value) || !cond.value.length || (!isNil(withLength) ? withLength : false)) {
-      this.throwBadRequestException(`Invalid column '${ cond.field }' value`);
+      this.throwBadRequestException(`Invalid column '${cond.field}' value`);
     }
   }
 
@@ -647,7 +659,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
       for (let i = 0; i < this.sqlInjectionRegEx.length; i++) {
         /* istanbul ignore else */
         if (this.sqlInjectionRegEx[0].test(field)) {
-          this.throwBadRequestException(`SQL injection detected: "${ field }"`);
+          this.throwBadRequestException(`SQL injection detected: "${field}"`);
         }
       }
     }
