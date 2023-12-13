@@ -27,7 +27,6 @@ import { UsersService } from './users.service';
     },
   },
   query: {
-    softDelete: true,
     join: {
       company: {
         exclude: ['description'],

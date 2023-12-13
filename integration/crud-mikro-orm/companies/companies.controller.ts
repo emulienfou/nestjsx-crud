@@ -18,28 +18,27 @@ import { serialize } from './responses';
   },
   query: {
     alwaysPaginate: false,
-    softDelete: true,
     allow: ['name'],
-    // join: {
-    //   users: {
-    //     alias: 'companyUsers',
-    //     exclude: ['email'],
-    //     eager: true,
-    //   },
-    //   'users.projects': {
-    //     eager: true,
-    //     alias: 'usersProjects',
-    //     allow: ['name'],
-    //   },
-    //   'users.projects.company': {
-    //     eager: true,
-    //     alias: 'usersProjectsCompany',
-    //   },
-    //   projects: {
-    //     eager: true,
-    //     select: false,
-    //   },
-    // },
+    join: {
+      users: {
+        alias: 'companyUsers',
+        exclude: ['email'],
+        eager: true,
+      },
+      // 'users.projects': {
+      //   eager: true,
+      //   alias: 'usersProjects',
+      //   allow: ['name'],
+      // },
+      // 'users.projects.company': {
+      //   eager: true,
+      //   alias: 'usersProjectsCompany',
+      // },
+      // projects: {
+      //   eager: true,
+      //   select: false,
+      // },
+    },
   },
 })
 @ApiTags('companies')
