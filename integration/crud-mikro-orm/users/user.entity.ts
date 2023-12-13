@@ -44,12 +44,6 @@ export class User extends BaseEntity {
   name: Name;
 
   @Property({ nullable: true })
-  profileId?: number;
-
-  @Property({ nullable: false })
-  companyId?: number;
-
-  @Property({ nullable: true })
   deletedAt?: Date;
 
   /**

@@ -5,10 +5,7 @@ import { Project } from './project.entity';
 @Entity({ tableName: 'user_projects' })
 export class UserProject {
   @PrimaryKey()
-  public projectId!: number;
-
-  @PrimaryKey()
-  public userId!: number;
+  public id: number;
 
   @Property({ nullable: true })
   public review!: string;

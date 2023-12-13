@@ -1,6 +1,6 @@
 import { Cascade, Entity, ManyToMany, ManyToOne, OneToMany, Property } from '@mikro-orm/core';
 import { CrudValidationGroups } from '@nestjsx/crud';
-import { IsBoolean, IsDefined, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsDefined, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { BaseEntity } from '../base-entity';
 import { Company } from '../companies';
@@ -27,16 +27,11 @@ export class Project extends BaseEntity {
   @Property({ type: 'boolean', default: true })
   isActive?: boolean;
 
-  @IsOptional({ always: true })
-  @IsNumber({}, { always: true })
-  @Property({ nullable: false })
-  companyId?: number;
-
   /**
    * Relations
    */
 
-  @ManyToOne(() => Company, { inversedBy: 'projects', nullable: true})
+  @ManyToOne(() => Company, { inversedBy: 'projects', nullable: true })
   company?: Company;
 
   @ManyToMany(() => User, (u) => u.projects, { cascade: [Cascade.ALL] })

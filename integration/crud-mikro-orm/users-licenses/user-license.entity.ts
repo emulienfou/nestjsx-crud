@@ -6,10 +6,7 @@ import { License } from './license.entity';
 @Entity({ tableName: 'user_licenses' })
 export class UserLicense {
   @PrimaryKey()
-  userId: number;
-
-  @PrimaryKey()
-  licenseId: number;
+  id: number;
 
   @ManyToOne(() => User, { nullable: true })
   @Type(() => User)

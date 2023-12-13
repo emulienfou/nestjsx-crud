@@ -112,6 +112,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "default": "uuid_generate_v4()",
           "mappedType": "uuid"
         },
         "description": {
@@ -306,7 +307,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         }
       },
@@ -344,6 +345,7 @@
             "id"
           ],
           "referencedTableName": "public.companies",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       }
@@ -481,6 +483,16 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 0,
+          "mappedType": "datetime"
+        },
         "profile_id": {
           "name": "profile_id",
           "type": "int",
@@ -496,18 +508,8 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamptz(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
           "nullable": true,
-          "length": 0,
-          "mappedType": "datetime"
+          "mappedType": "integer"
         }
       },
       "name": "users",
@@ -566,19 +568,29 @@
             "id"
           ],
           "referencedTableName": "public.companies",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       }
     },
     {
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "user_id": {
           "name": "user_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
         "license_id": {
@@ -587,7 +599,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
         "years_active": {
@@ -606,10 +618,9 @@
         {
           "keyName": "user_licenses_pkey",
           "columnNames": [
-            "user_id",
-            "license_id"
+            "id"
           ],
-          "composite": true,
+          "composite": false,
           "primary": true,
           "unique": true
         }
@@ -626,6 +637,7 @@
             "id"
           ],
           "referencedTableName": "public.users",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "user_licenses_license_id_foreign": {
@@ -638,27 +650,19 @@
             "id"
           ],
           "referencedTableName": "public.licenses",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       }
     },
     {
       "columns": {
-        "project_id": {
-          "name": "project_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
           "nullable": false,
           "mappedType": "integer"
         },
@@ -670,6 +674,24 @@
           "primary": false,
           "nullable": true,
           "mappedType": "string"
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
         }
       },
       "name": "user_projects",
@@ -678,10 +700,9 @@
         {
           "keyName": "user_projects_pkey",
           "columnNames": [
-            "project_id",
-            "user_id"
+            "id"
           ],
-          "composite": true,
+          "composite": false,
           "primary": true,
           "unique": true
         }
@@ -711,6 +732,7 @@
             "id"
           ],
           "referencedTableName": "public.users",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       }
