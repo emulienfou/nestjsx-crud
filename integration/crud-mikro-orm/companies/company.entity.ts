@@ -1,6 +1,5 @@
-import { Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { Collection, Entity, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import { CrudValidationGroups } from '@nestjsx/crud';
-import { Type } from 'class-transformer';
 import { IsEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
 import { BaseEntity } from '../base-entity';
@@ -15,7 +14,7 @@ export class Company extends BaseEntity {
   @IsEmpty({ groups: [CREATE] })
   @IsNumber({}, { groups: [UPDATE] })
   @PrimaryKey()
-  id?: number;
+  id: number;
 
   @IsOptional({ groups: [UPDATE] })
   @IsNotEmpty({ groups: [CREATE] })
@@ -44,9 +43,8 @@ export class Company extends BaseEntity {
    */
 
   @OneToMany(() => User, (u) => u.company)
-  @Type(() => User)
-  users: User[];
+  users = new Collection<User>(this);
 
   @OneToMany(() => Project, (p) => p.company)
-  projects: Project[];
+  projects = new Collection<Project>(this);
 }

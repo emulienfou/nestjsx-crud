@@ -1,5 +1,4 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
-import { Type } from 'class-transformer';
 import { User } from '../users';
 import { License } from './license.entity';
 
@@ -9,11 +8,9 @@ export class UserLicense {
   id: number;
 
   @ManyToOne(() => User, { nullable: true })
-  @Type(() => User)
   user: User;
 
   @ManyToOne(() => License, { nullable: true })
-  @Type(() => License)
   license: License;
 
   @Property()

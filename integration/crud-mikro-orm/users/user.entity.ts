@@ -1,6 +1,5 @@
 import { Cascade, Collection, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, Property } from '@mikro-orm/core';
 import { CrudValidationGroups } from '@nestjsx/crud';
-import { Type } from 'class-transformer';
 import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 
 import { BaseEntity } from '../base-entity';
@@ -39,7 +38,6 @@ export class User extends BaseEntity {
   @Property({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Type(() => Name)
   @Property({ type: Name })
   name: Name;
 
@@ -53,11 +51,10 @@ export class User extends BaseEntity {
   @IsOptional({ groups: [UPDATE] })
   @IsNotEmpty({ groups: [CREATE] })
   @ValidateNested({ always: true })
-  @Type(() => UserProfile)
   @OneToOne(() => UserProfile, (p) => p.user, { cascade: [Cascade.ALL], owner: true })
   profile?: UserProfile;
 
-  @ManyToOne(() => Company, { inversedBy: 'users', nullable: true })
+  @ManyToOne(() => Company, { inversedBy: 'users' })
   company?: Company;
 
   @ManyToMany(() => Project, (c) => c.users, { owner: true })
@@ -66,9 +63,8 @@ export class User extends BaseEntity {
   @OneToMany(() => UserProject, (el) => el.user, {
     orphanRemoval: true,
   })
-  userProjects?: UserProject[];
+  userProjects = new Collection<UserProject>(this);
 
   @OneToMany(() => UserLicense, (ul) => ul.user)
-  @Type(() => UserLicense)
-  userLicenses?: UserLicense[];
+  userLicenses = new Collection<UserLicense>(this);
 }

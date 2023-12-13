@@ -1,4 +1,4 @@
-import { Cascade, Entity, ManyToMany, ManyToOne, OneToMany, Property } from '@mikro-orm/core';
+import { Cascade, Collection, Entity, ManyToMany, ManyToOne, OneToMany, Property } from '@mikro-orm/core';
 import { CrudValidationGroups } from '@nestjsx/crud';
 import { IsBoolean, IsDefined, IsOptional, IsString, MaxLength } from 'class-validator';
 
@@ -35,10 +35,10 @@ export class Project extends BaseEntity {
   company?: Company;
 
   @ManyToMany(() => User, (u) => u.projects, { cascade: [Cascade.ALL] })
-  users?: User[];
+  users = new Collection<User>(this);
 
   @OneToMany(() => UserProject, (el) => el.project, {
     orphanRemoval: true,
   })
-  userProjects!: UserProject[];
+  userProjects = new Collection<UserProject>(this);
 }
