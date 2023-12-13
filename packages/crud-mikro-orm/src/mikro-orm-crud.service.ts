@@ -1,7 +1,6 @@
-import { EntityRepository } from '@mikro-orm/core';
-import { RequiredEntityData } from '@mikro-orm/core/typings';
+import { EntityRepository, RequiredEntityData } from '@mikro-orm/core';
 import { QueryBuilder } from '@mikro-orm/knex';
-import { NotImplementedException } from '@nestjs/common/exceptions/not-implemented.exception';
+import { NotImplementedException } from '@nestjs/common';
 import { CreateManyDto, CrudRequest, CrudRequestOptions, GetManyDefaultResponse } from '@nestjsx/crud';
 import { ParsedRequestParams } from '@nestjsx/crud-request';
 import { hasLength, isArrayFull, isNil, isObject, isUndefined, objKeys } from '@nestjsx/util';

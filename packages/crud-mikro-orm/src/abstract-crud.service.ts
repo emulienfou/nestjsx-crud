@@ -1,11 +1,11 @@
-import { Constructor, EntityMetadata, type QBFilterQuery } from '@mikro-orm/core';
+import { Constructor, EntityMetadata, GroupOperator, type QBFilterQuery } from '@mikro-orm/core';
 import { QueryBuilder } from '@mikro-orm/knex';
 import { EntityManager as MySQLEntityManager, EntityRepository as MySQLEntityRepository } from '@mikro-orm/mysql';
 import {
   EntityManager as PostgreSQLEntityManager,
   EntityRepository as PostgreSQLEntityRepository,
 } from '@mikro-orm/postgresql';
-import { NotImplementedException } from '@nestjs/common/exceptions/not-implemented.exception';
+import { NotImplementedException } from '@nestjs/common';
 import {
   CrudRequest,
   CrudRequestOptions,
@@ -22,7 +22,6 @@ import {
   QueryJoin,
   QuerySort,
   SCondition,
-  SConditionKey,
 } from '@nestjsx/crud-request';
 import { hasLength, isArrayFull, isNil, isNull, isObject, ObjectLiteral, objKeys } from '@nestjsx/util';
 
@@ -294,7 +293,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     }
   }
 
-  protected setSearchCondition(builder: QueryBuilder<T>, search: SCondition, condition: SConditionKey = '$and'): void {
+  protected setSearchCondition(builder: QueryBuilder<T>, search: SCondition, operator: GroupOperator = GroupOperator.$and): void {
     /* istanbul ignore else */
     if (isObject(search)) {
       const keys = objKeys(search);
@@ -304,11 +303,11 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
         if (isArrayFull(search.$and)) {
           // search: {$and: [{}]}
           if (search.$and.length === 1) {
-            this.setSearchCondition(builder, search.$and[0], condition);
+            this.setSearchCondition(builder, search.$and[0], operator);
           }
           // search: {$and: [{}, {}, ...]}
           else {
-            this.builderAddBrackets(builder, '$and', search.$and);
+            this.builderAddBrackets(builder, GroupOperator.$and, search.$and);
           }
         }
         // search: {$or: [...], ...}
@@ -317,11 +316,11 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
           if (keys.length === 1) {
             // search: {$or: [{}]}
             if (search.$or.length === 1) {
-              this.setSearchCondition(builder, search.$or[0], condition);
+              this.setSearchCondition(builder, search.$or[0], operator);
             }
             // search: {$or: [{}, {}, ...]}
             else {
-              this.builderAddBrackets(builder, '$or', search.$or);
+              this.builderAddBrackets(builder, GroupOperator.$or, search.$or);
             }
           }
           // search: {$or: [...], foo, ...}
@@ -366,9 +365,9 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
             const field = keys[0];
             const value = search[field];
             if (!isObject(value)) {
-              this.builderSetWhere(builder, condition, field, value);
+              this.builderSetWhere(builder, operator, field, value);
             } else {
-              this.setSearchFieldObjectCondition(builder, condition, field, value);
+              this.setSearchFieldObjectCondition(builder, operator, field, value);
             }
           }
           // search: {foo, ...}
@@ -529,8 +528,8 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     }
   }
 
-  protected builderAddBrackets(builder: QueryBuilder<T>, condition: SConditionKey, filter: QBFilterQuery<T>): void {
-    if (condition === '$and') {
+  protected builderAddBrackets(builder: QueryBuilder<T>, operator: GroupOperator, filter: QBFilterQuery<T>): void {
+    if (operator === GroupOperator.$and) {
       builder.andWhere(filter);
     } else {
       builder.orWhere(filter);
@@ -547,19 +546,19 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
   protected builderSetWhere(
     builder: QueryBuilder<T>,
-    condition: SConditionKey,
+    condition: GroupOperator,
     field: string,
     value: any,
-    operator: ComparisonOperator = '$eq',
+    operator: ComparisonOperator = CondOperator.EQUALS,
   ): void {
     const args = [{ field, operator: isNull(value) ? '$isnull' : operator, value }, builder];
-    const fn = condition === '$and' ? this.setAndWhere : this.setOrWhere;
+    const fn = condition === GroupOperator.$and ? this.setAndWhere : this.setOrWhere;
     fn.apply(this, args);
   }
 
   protected setSearchFieldObjectCondition(
     builder: QueryBuilder<T>,
-    condition: SConditionKey,
+    condition: GroupOperator,
     field: string,
     object: any,
   ): void {
@@ -573,7 +572,7 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
 
         if (isObject(object.$or)) {
           const orKeys = objKeys(object.$or);
-          this.setSearchFieldObjectCondition(builder, orKeys.length === 1 ? condition : '$or', field, object.$or);
+          this.setSearchFieldObjectCondition(builder, orKeys.length === 1 ? condition : GroupOperator.$or, field, object.$or);
         } else {
           this.builderSetWhere(builder, condition, field, value, operator);
         }
