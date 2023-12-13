@@ -138,8 +138,8 @@ export abstract class AbstractCrudService<T extends object> extends CrudService<
     this.entityColumns = this.metadata.props.map((prop) => {
       // In case column is an embedded, use the propertyPath to get complete path
       if (prop.targetMeta) {
-        this.entityColumnsHash[prop.targetMeta.name] = `${ prop.name }.${ prop.targetMeta.name }`;
-        return prop.targetMeta.name;
+        this.entityColumnsHash[prop.targetMeta.name] = `${ prop.name }.${ prop.targetMeta.collection }`;
+        return prop.targetMeta.collection;
       }
       this.entityColumnsHash[prop.name] = prop.name;
 
