@@ -37,7 +37,7 @@
     "email": "mihon4ik@gmail.com"
   },
   "scripts": {
-    "prebuild": "rm -rf lib && rm tsconfig.tsbuildinfo",
+    "prebuild": "rm -rf lib && rm -rf tsconfig.tsbuildinfo",
     "build": "npx tsc -b"
   },
   "dependencies": {

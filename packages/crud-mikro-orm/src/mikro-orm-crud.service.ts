@@ -56,7 +56,7 @@ export class MikroOrmCrudService<T extends object> extends AbstractCrudService<T
    */
   public async createOne(req: CrudRequest, dto: T | Partial<T>): Promise<T> {
     const { returnShallow } = req.options.routes.createOneBase;
-    const entity = this.repo.create<T>(dto as RequiredEntityData<T>);
+    const entity = this.repo.create(dto as RequiredEntityData<T>);
 
     /* istanbul ignore if */
     if (!entity) {
